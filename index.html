@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 <div class="wrap">
@@ -38,7 +38,7 @@
   <nav class="tabs" id="tabs" aria-label="Navigation">
     <button class="tab active" data-tab="today" type="button">Aujourd'hui</button>
     <button class="tab" data-tab="plan"  type="button">Plan complet</button>
-    <button class="tab" data-tab="exams" type="button">Examens faits</button>
+    <button class="tab" data-tab="exams" type="button">Par matière</button>
   </nav>
 
   <!-- ══ VUE : AUJOURD'HUI ═══════════════════════════════════════════════════ -->
@@ -237,14 +237,16 @@
     </section>
   </section>
 
-  <!-- ══ VUE : EXAMENS FAITS ═════════════════════════════════════════════════ -->
-  <section id="view-exams" class="view" aria-label="Examens faits">
+  <!-- ══ VUE : PAR MATIÈRE (checklist générale) ══════════════════════════════ -->
+  <section id="view-exams" class="view" aria-label="Par matière">
     <div class="exams-intro">
-      <h2>Examens à faire</h2>
-      <p>Coche les annales/examens blancs au fur et à mesure. Tu peux <b>ajouter</b> ou
-         <b>retirer</b> un examen de chaque liste. Cette liste est sauvegardée comme la progression.</p>
+      <h2>Checklist par matière</h2>
+      <p>Tout ce que tu dois faire pour chaque examen, regroupé par matière et trié par date.
+         Cocher une tâche ici la coche <b>partout</b> (plan, aujourd'hui) et fait avancer la
+         progression globale. Tu peux <b>ajouter</b> une tâche (en choisissant pour quel jour)
+         ou en <b>retirer</b> une.</p>
     </div>
-    <div id="examTracker"></div>
+    <div id="subjectChecklist"></div>
   </section>
 
   <!-- ── Pied de page ──────────────────────────────────────────────────────── -->
@@ -305,6 +307,6 @@
   </div>
 </dialog>
 
-<script type="module" src="app.js?v=2"></script>
+<script type="module" src="app.js?v=3"></script>
 </body>
 </html>

@@ -2,11 +2,15 @@
 
 Site statique interactif pour suivre la progression de révision sur 4 examens (Algèbre, Thermodynamique, Analyse II, Métrologie).
 
-## Onglets
+## Modèle unifié de tâches
 
-- **Aujourd'hui** — affiche automatiquement le programme du jour selon la date du jour (champ `date` de chaque jour dans `data.js`), le prochain examen, et les échéances de maîtrise des cartes/preuves.
-- **Plan complet** — comptes à rebours, progression globale, **progression par matière**, planning jour par jour et aide-mémoire.
-- **Examens faits** — checklist des annales / examens blancs par matière. On peut **cocher**, **ajouter** et **retirer** des examens ; la liste est sauvegardée comme la progression.
+Tout est **une seule liste de tâches**. Chaque tâche a une matière (`subject` = tag) et un jour (`date`). Les trois onglets ne sont que trois regroupements de cette même liste, donc **cocher une tâche n'importe où la coche partout** et fait avancer la même progression globale.
+
+- **Aujourd'hui** — programme du jour selon la date réelle, **compte à rebours exact** (jours/heures/minutes) du prochain examen, et échéances cartes/preuves.
+- **Plan complet** — comptes à rebours (les examens passés sont **barrés**), progression globale, **progression par matière**, planning jour par jour, aide-mémoire.
+- **Par matière** — checklist générale regroupée par matière (triée par date) : tout ce qu'il y a à faire pour chaque examen. On peut **cocher**, **ajouter** une tâche (en choisissant pour quel jour et quel moment) ou en **retirer** une.
+
+Les tâches du plan sont définies dans `data.js` (`PLAN`). Les tâches ajoutées par l'utilisateur et les suppressions sont stockées dans `progress.json` (`userTasks`, `removed`) et synchronisées comme la progression.
 
 ## Structure des fichiers
 

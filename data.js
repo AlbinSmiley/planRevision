@@ -1,9 +1,19 @@
 // ─── Examens officiels (comptes à rebours) ──────────────────────────────────────
+// datetime = début exact de l'examen (heure locale). Sert au compte à rebours précis
+// et à barrer la carte une fois l'examen passé.
 export const EXAMS = [
-  { k: 'alg',     label: 'Algèbre linéaire II', sub: 'écrit',       date: '2026-06-15', time: '15:15 → 19:55' },
-  { k: 'thermo',  label: 'Thermodynamique',      sub: 'écrit',       date: '2026-06-19', time: '09:15 → 13:55' },
-  { k: 'analyse', label: 'Analyse II',            sub: 'écrit',       date: '2026-06-22', time: '15:15 → 19:55' },
-  { k: 'metro',   label: 'Métrologie',            sub: 'oral (labo)', date: '2026-06-26', time: '15:30 → 18:15' },
+  { k: 'alg',     label: 'Algèbre linéaire II', sub: 'écrit',       date: '2026-06-15', time: '15:15 → 19:55', datetime: '2026-06-15T15:15' },
+  { k: 'thermo',  label: 'Thermodynamique',      sub: 'écrit',       date: '2026-06-19', time: '09:15 → 13:55', datetime: '2026-06-19T09:15' },
+  { k: 'analyse', label: 'Analyse II',            sub: 'écrit',       date: '2026-06-22', time: '15:15 → 19:55', datetime: '2026-06-22T15:15' },
+  { k: 'metro',   label: 'Métrologie',            sub: 'oral (labo)', date: '2026-06-26', time: '15:30 → 18:15', datetime: '2026-06-26T15:30' },
+];
+
+// ─── Matières (utilisé pour la vue « Par matière », les couleurs, les totaux) ────
+export const SUBJECTS = [
+  { k: 'alg',     label: 'Algèbre' },
+  { k: 'thermo',  label: 'Thermodynamique' },
+  { k: 'analyse', label: 'Analyse' },
+  { k: 'metro',   label: 'Métrologie' },
 ];
 
 // ─── Échéances : date limite pour avoir TOUT maîtrisé (cartes / preuves) ────────
@@ -11,20 +21,6 @@ export const DEADLINES = [
   { k: 'alg',     label: 'Cartes d’Algèbre maîtrisées',              date: '2026-06-14' },
   { k: 'thermo',  label: 'Cartes de Thermo maîtrisées',                   date: '2026-06-18' },
   { k: 'analyse', label: 'Cartes + 14 preuves d’Analyse maîtrisées', date: '2026-06-21' },
-];
-
-// ─── Annales / examens blancs disponibles par matière ───────────────────────────
-// Liste de DÉPART : modifiable dans l'onglet « Examens » (ajout / suppression).
-export const EXAM_POOL = {
-  alg:     ['2025', '2024', '2023', '2022', '2021', '2020', '2019', 'Examen blanc'],
-  thermo:  ['2025', '2024', '2023', '2022', '2021', '2020', '2019', 'Examen blanc'],
-  analyse: ['2023', '2022', '2021', '2020', '2019', 'Examen blanc'],
-};
-
-export const EXAM_SUBJECTS = [
-  { k: 'alg',     label: 'Algèbre' },
-  { k: 'thermo',  label: 'Thermodynamique' },
-  { k: 'analyse', label: 'Analyse' },
 ];
 
 function t(tag, label) { return { tag, label }; }

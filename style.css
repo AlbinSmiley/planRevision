@@ -161,12 +161,19 @@ h1 em { font-style: italic; color: var(--ink-soft); }
 .exam-card .ed { font-size: 11px; color: var(--ink-faint); margin-top: 1px; }
 .exam-card .ec {
   font-family: 'Fraunces', serif;
-  font-size: 28px; font-weight: 500;
-  line-height: 1;
+  font-size: 23px; font-weight: 500;
+  line-height: 1.05;
   margin-top: 8px;
   color: var(--ink);
+  white-space: nowrap;
 }
-.exam-card .ec small { font-size: 12px; font-family: 'Public Sans'; color: var(--ink-faint); }
+.exam-card .ec small { font-size: 11px; font-family: 'Public Sans'; color: var(--ink-faint); }
+
+/* Examen passé : carte barrée + grisée */
+.exam-card.passed { opacity: .55; }
+.exam-card.passed .en { text-decoration: line-through; text-decoration-color: currentColor; }
+.exam-card.passed::before { opacity: .4; }
+.exam-card.passed .ec { color: var(--ink-faint); }
 
 /* ── Overall progress ────────────────────────────────────────────────────────── */
 .overall {
@@ -604,11 +611,11 @@ dialog::backdrop {
 .ne-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 19px; line-height: 1.15; margin-top: 2px; }
 .ne-date { font-size: 12.5px; opacity: .75; margin-top: 2px; }
 .next-exam .ne-r {
-  flex-shrink: 0; text-align: center; line-height: 1;
-  display: flex; flex-direction: column; align-items: center;
+  flex-shrink: 0; text-align: right; line-height: 1.05;
+  display: flex; flex-direction: column; align-items: flex-end;
 }
-.ne-num { font-family: 'Fraunces', serif; font-weight: 600; font-size: 40px; }
-.ne-unit { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; opacity: .7; margin-top: 2px; }
+.ne-num { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; white-space: nowrap; }
+.ne-unit { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; opacity: .7; margin-top: 3px; }
 
 .next-exam.alg     .ne-name, .next-exam.alg     .ne-num { color: var(--alg-ink); }
 .next-exam.thermo  .ne-name, .next-exam.thermo  .ne-num { color: var(--thermo-ink); }
@@ -688,28 +695,37 @@ dialog::backdrop {
 .sp.analyse .sp-name { color: var(--analyse-ink); }
 .sp.metro   .sp-name { color: var(--metro-ink); }
 
+/* ── Ligne de tâche : case + label, et éventuellement bouton supprimer ────────── */
+.taskrow { display: flex; align-items: flex-start; gap: 6px; }
+.taskrow .task { flex: 1; min-width: 0; }
+.tdel {
+  flex-shrink: 0; width: 26px; height: 26px; border-radius: 7px; margin-top: 1px;
+  border: none; background: transparent; color: var(--ink-faint);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .15s;
+}
+.tdel:hover { background: var(--metro-bg); color: var(--metro-ink); }
+.tdate {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  padding: 1px 7px; border-radius: 4px; margin-right: 6px; vertical-align: 1px;
+  background: var(--paper); border: 1px solid var(--line); color: var(--ink-soft);
+  white-space: nowrap;
+}
+.tuser { color: var(--ink-faint); font-weight: 700; margin-left: 5px; }
+
 /* ══════════════════════════════════════════════════════════════════════════════
-   VUE EXAMENS FAITS
+   VUE PAR MATIÈRE (checklist générale)
    ══════════════════════════════════════════════════════════════════════════════ */
 .exams-intro { margin-bottom: 16px; }
 .exams-intro h2 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; margin-bottom: 6px; }
-.exams-intro p { font-size: 13.5px; color: var(--ink-soft); max-width: 620px; }
+.exams-intro p { font-size: 13.5px; color: var(--ink-soft); max-width: 640px; }
 .exams-intro b { color: var(--ink); font-weight: 600; }
-
-.ex-summary {
-  font-size: 14px; color: var(--ink-soft);
-  background: var(--paper-2);
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  padding: 12px 16px; margin-bottom: 14px;
-}
-.ex-summary b { color: var(--ink); font-family: 'Fraunces', serif; }
 
 .exsubj {
   background: var(--paper-2);
   border: 1px solid var(--line);
   border-radius: var(--r);
-  padding: 14px 16px 16px;
+  padding: 14px 16px 16px 18px;
   margin-bottom: 12px;
   position: relative;
   overflow: hidden;
@@ -718,56 +734,45 @@ dialog::backdrop {
 .exsubj.alg::before     { background: var(--alg); }
 .exsubj.thermo::before  { background: var(--thermo); }
 .exsubj.analyse::before { background: var(--analyse); }
+.exsubj.metro::before   { background: var(--metro); }
 
-.exsubj-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
-.exsubj-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 17px; }
+.exsubj-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.exsubj-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; }
 .exsubj.alg     .exsubj-name { color: var(--alg-ink); }
 .exsubj.thermo  .exsubj-name { color: var(--thermo-ink); }
 .exsubj.analyse .exsubj-name { color: var(--analyse-ink); }
+.exsubj.metro   .exsubj-name { color: var(--metro-ink); }
 .exsubj-count { font-size: 12.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
 
-.exlist { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.exempty { font-size: 13px; color: var(--ink-faint); font-style: italic; }
-.exitem {
-  display: flex; align-items: center; gap: 4px;
-  background: var(--paper-3);
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  padding: 4px 6px 4px 10px;
-}
-.exitem.done { background: var(--paper); }
-.exchk { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 13.5px; user-select: none; }
-.exchk .cbx {
-  width: 18px; height: 18px; border-radius: 50%;
-  border: 1.5px solid var(--line-2); background: var(--paper-3);
-  display: flex; align-items: center; justify-content: center;
-  transition: all .15s; flex-shrink: 0;
-}
-.exchk .cbx svg { opacity: 0; transform: scale(.4); transition: all .15s; color: #fff; }
-.exitem.done .exchk .cbx { background: var(--ink); border-color: var(--ink); }
-.exitem.done .exchk .cbx svg { opacity: 1; transform: none; }
-.exitem.done .exname { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--line-2); }
-.exname { font-variant-numeric: tabular-nums; }
-.exdel {
-  width: 24px; height: 24px; border-radius: 50%;
-  border: none; background: transparent; color: var(--ink-faint);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0; transition: all .15s;
-}
-.exdel:hover { background: var(--metro-bg); color: var(--metro-ink); }
+.exsubj-bar { height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+.exsubj-bar i { display: block; height: 100%; width: 0; border-radius: 3px; transition: width .4s ease; }
+.exsubj.alg     .exsubj-bar i { background: var(--alg); }
+.exsubj.thermo  .exsubj-bar i { background: var(--thermo); }
+.exsubj.analyse .exsubj-bar i { background: var(--analyse); }
+.exsubj.metro   .exsubj-bar i { background: var(--metro); }
 
-.exadd { display: flex; gap: 8px; }
-.exadd input {
-  flex: 1; min-width: 0;
-  font-family: inherit; font-size: 13.5px;
-  padding: 8px 12px;
+.checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.exempty { font-size: 13px; color: var(--ink-faint); font-style: italic; }
+
+/* Formulaire d'ajout de tâche */
+.addtask {
+  display: flex; flex-direction: column; gap: 8px;
+  border-top: 1px dashed var(--line); padding-top: 12px;
+}
+.addtask .at-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.addtask input, .addtask select {
+  font-family: inherit; font-size: 13px;
+  padding: 8px 11px;
   border: 1px solid var(--line-2);
   border-radius: var(--r-sm);
   background: var(--paper-3); color: var(--ink); outline: none;
   transition: border .15s;
 }
-.exadd input:focus { border-color: var(--ink-soft); }
-.exadd .btn { white-space: nowrap; }
+.addtask .at-label { width: 100%; }
+.addtask .at-day  { flex: 1; min-width: 140px; }
+.addtask .at-when { flex-shrink: 0; }
+.addtask input:focus, .addtask select:focus { border-color: var(--ink-soft); }
+.addtask .btn { white-space: nowrap; }
 
 /* ══════════════════════════════════════════════════════════════════════════════
    AMÉLIORATIONS MOBILE / iPHONE
@@ -803,16 +808,19 @@ dialog::backdrop {
 
   /* comptes à rebours : garder 2 colonnes, plus aérés */
   .exams { gap: 8px; }
-  .exam-card .ec { font-size: 24px; }
+  .exam-card .ec { font-size: 20px; }
 
   .subjprog { grid-template-columns: 1fr; gap: 9px; }
 
   .next-exam { padding: 14px 16px; gap: 10px; }
-  .ne-num { font-size: 34px; }
+  .ne-num { font-size: 21px; }
   .ne-name { font-size: 17px; }
 
-  .exadd { flex-direction: column; }
-  .exadd .btn { width: 100%; }
+  .addtask .at-row { flex-direction: column; }
+  .addtask .at-day, .addtask .at-when, .addtask .at-row .btn { width: 100%; }
 
   .legend { gap: 10px 14px; }
 }
+
+/* État « jour sans tâche » */
+.dempty { font-size: 13px; color: var(--ink-faint); font-style: italic; padding: 8px 0; }
