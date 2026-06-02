@@ -1,4 +1,4 @@
-import { PLAN, EXAMS, DEADLINES, EXAM_POOL, EXAM_SUBJECTS } from './data.js';
+import { PLAN, EXAMS, DEADLINES, EXAM_POOL, EXAM_SUBJECTS } from './data.js?v=2';
 
 // ─── État ──────────────────────────────────────────────────────────────────────
 // STATE = { tasks: { [taskId]: bool }, exams: { [subject]: [{name, done}] } }
