@@ -1,7 +1,8 @@
 {
   "tasks": {
     "d04:0:0": false,
-    "d01:0:0": true
+    "d01:0:0": true,
+    "d05:2:0": false
   },
   "userTasks": [],
   "removed": {}
