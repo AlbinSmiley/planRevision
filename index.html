@@ -2,8 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Plan de révision session juin 2026 — Algèbre, Thermodynamique, Analyse, Métrologie">
+  <meta name="theme-color" content="#F7F2E9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>Révision · juin 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,12 +20,7 @@
   <header class="site-header">
     <div class="header-main">
       <p class="eyebrow">Session d'examens · juin 2026</p>
-      <h1>Plan de révision <em>— quatre examens, vingt-quatre jours.</em></h1>
-      <p class="lede">
-        Un objectif par bloc, des cases à cocher qui se sauvegardent.
-        La logique : <b>l'examen le plus proche est prioritaire</b>,
-        et on prépare le suivant en arrière-plan pour ne jamais partir de zéro.
-      </p>
+      <h1>Plan de révision <em>— quatre examens.</em></h1>
     </div>
     <div class="header-actions">
       <span class="sync-dot s-loading" id="syncStatus" title="Chargement…"></span>
@@ -36,195 +34,221 @@
     </div>
   </header>
 
-  <!-- ── Comptes à rebours ─────────────────────────────────────────────────── -->
-  <div class="exams" id="exams">
-    <div class="exam-card alg">
-      <div class="en">Algèbre lin. II</div>
-      <div class="ed">dim 15 juin · écrit</div>
-      <div class="ec" id="cd-alg">—</div>
-    </div>
-    <div class="exam-card thermo">
-      <div class="en">Thermodynamique</div>
-      <div class="ed">jeu 19 juin · écrit</div>
-      <div class="ec" id="cd-thermo">—</div>
-    </div>
-    <div class="exam-card analyse">
-      <div class="en">Analyse II</div>
-      <div class="ed">dim 22 juin · écrit</div>
-      <div class="ec" id="cd-analyse">—</div>
-    </div>
-    <div class="exam-card metro">
-      <div class="en">Métrologie</div>
-      <div class="ed">jeu 26 juin · oral</div>
-      <div class="ec" id="cd-metro">—</div>
-    </div>
-  </div>
+  <!-- ── Onglets ──────────────────────────────────────────────────────────── -->
+  <nav class="tabs" id="tabs" aria-label="Navigation">
+    <button class="tab active" data-tab="today" type="button">Aujourd'hui</button>
+    <button class="tab" data-tab="plan"  type="button">Plan complet</button>
+    <button class="tab" data-tab="exams" type="button">Examens faits</button>
+  </nav>
 
-  <!-- ── Barre de progression globale ─────────────────────────────────────── -->
-  <div class="overall">
-    <svg width="54" height="54" viewBox="0 0 54 54" aria-hidden="true">
-      <circle cx="27" cy="27" r="22" fill="none" stroke="var(--line)" stroke-width="5"/>
-      <circle id="ringfill" cx="27" cy="27" r="22" fill="none"
-              stroke="var(--ink)" stroke-width="5" stroke-linecap="round"
-              stroke-dasharray="138.2" stroke-dashoffset="138.2"
-              transform="rotate(-90 27 27)" style="transition:stroke-dashoffset .4s"/>
-      <text id="ringtxt" x="27" y="31" text-anchor="middle"
-            font-family="Fraunces,serif" font-size="12" font-weight="600"
-            fill="var(--ink)">0%</text>
-    </svg>
-    <div class="meta">
-      <div class="ot">Progression globale</div>
-      <div class="os">
-        <span id="donecount">0</span> tâches sur <span id="totalcount">…</span>
-        — <span id="pcttext">0 %</span>
+  <!-- ══ VUE : AUJOURD'HUI ═══════════════════════════════════════════════════ -->
+  <section id="view-today" class="view active" aria-label="Aujourd'hui"></section>
+
+  <!-- ══ VUE : PLAN COMPLET ══════════════════════════════════════════════════ -->
+  <section id="view-plan" class="view">
+
+    <!-- Comptes à rebours -->
+    <div class="exams" id="exams">
+      <div class="exam-card alg">
+        <div class="en">Algèbre lin. II</div>
+        <div class="ed">lun 15 juin · écrit</div>
+        <div class="ec" id="cd-alg">—</div>
       </div>
-      <div class="bar"><i id="overbar"></i></div>
-    </div>
-  </div>
-
-  <!-- ── Légende ───────────────────────────────────────────────────────────── -->
-  <div class="legend" aria-label="Légende des matières">
-    <span class="lg"><span class="dot" style="background:var(--alg)"></span>Algèbre lin. II</span>
-    <span class="lg"><span class="dot" style="background:var(--thermo)"></span>Thermodynamique</span>
-    <span class="lg"><span class="dot" style="background:var(--analyse)"></span>Analyse II</span>
-    <span class="lg"><span class="dot" style="background:var(--metro)"></span>Métrologie</span>
-  </div>
-
-  <!-- ── Plan jour par jour ────────────────────────────────────────────────── -->
-  <main id="plan" aria-label="Planning jour par jour"></main>
-
-  <!-- ── Aide-mémoire ──────────────────────────────────────────────────────── -->
-  <section class="refs" aria-label="Aide-mémoire">
-    <h2>Aide-mémoire</h2>
-
-    <div class="ref" id="ref-preuves">
-      <div class="rhead" role="button" tabindex="0"
-           aria-expanded="false" aria-controls="rb-preuves">
-        Les 14 preuves d'Analyse à savoir par cœur
-        <span class="rchev" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.7"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
+      <div class="exam-card thermo">
+        <div class="en">Thermodynamique</div>
+        <div class="ed">ven 19 juin · écrit</div>
+        <div class="ec" id="cd-thermo">—</div>
       </div>
-      <div class="rbody" id="rb-preuves">
-        <p>Le prof a annoncé qu'<b>une question portera sur l'une de ces preuves</b>. Les autres
-        questions peuvent réutiliser des morceaux. Récite-les à voix haute / sur papier sans regarder.</p>
-        <div class="ch">Ch.1 — Espace ℝⁿ</div>
-        <ol>
-          <li>Une suite de ℝⁿ converge ⟺ chaque composante converge.</li>
-          <li>La boule ouverte est ouverte / la boule fermée est fermée.</li>
-        </ol>
-        <div class="ch">Ch.2 — Courbes paramétrées</div>
-        <ol start="3"><li>Formule de la longueur d'une courbe par les sommes de Riemann.</li></ol>
-        <div class="ch">Ch.3 — Fonctions</div>
-        <ol start="4">
-          <li>x₀ est un point d'accumulation de E ⟺ ∃ suite (xₖ) ∈ E\{x₀} avec xₖ → x₀.</li>
-          <li>Une fonction continue sur un ouvert, prolongée par continuité au bord, est continue sur la fermeture.</li>
-        </ol>
-        <div class="ch">Ch.4 — Dérivées partielles</div>
-        <ol start="6">
-          <li>f continûment différentiable en x₀ ⟹ f différentiable en x₀.</li>
-          <li>Théorème des accroissements finis.</li>
-          <li>Formule de la dérivée directionnelle pour une fonction différentiable.</li>
-          <li>Théorème de Taylor pour une fonction C².</li>
-          <li>Condition suffisante pour que f(x₀) soit un extremum local.</li>
-          <li>Condition nécessaire : extremum lié ⟹ point stationnaire du lagrangien.</li>
-        </ol>
-        <div class="ch">Ch.5 — Intégrales</div>
-        <ol start="12">
-          <li>L'intégrale d'une fonction continue dépendant d'un paramètre est continue.</li>
-          <li>Dérivabilité de l'intégrale paramétrique — Leibniz (bornes constantes).</li>
-        </ol>
-        <div class="ch">Ch.6 — EDO</div>
-        <ol start="14"><li>Existence et unicité locale des solutions d'une EDO à variables séparées.</li></ol>
+      <div class="exam-card analyse">
+        <div class="en">Analyse II</div>
+        <div class="ed">lun 22 juin · écrit</div>
+        <div class="ec" id="cd-analyse">—</div>
+      </div>
+      <div class="exam-card metro">
+        <div class="en">Métrologie</div>
+        <div class="ed">ven 26 juin · oral</div>
+        <div class="ec" id="cd-metro">—</div>
       </div>
     </div>
 
-    <div class="ref" id="ref-alg">
-      <div class="rhead" role="button" tabindex="0"
-           aria-expanded="false" aria-controls="rb-alg">
-        Plan du prof d'Algèbre — savoir-faire chapitres 9 à 13
-        <span class="rchev" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.7"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-      </div>
-      <div class="rbody" id="rb-alg">
-        <p>Cible : pouvoir <b>énoncer les définitions</b>, appliquer les résultats et
-        <b>rédiger des démos courtes</b>. Coche chaque point lors de ta récitation finale.</p>
-        <div class="ch">1 · Polynômes minimaux & réduction</div>
-        <ul>
-          <li>Polynôme annulateur, polynôme minimal, <b>Cayley–Hamilton</b>.</li>
-          <li>Sous-espace invariant, valeur propre / sous-espace propre généralisé.</li>
-          <li><b>Décomposition primaire</b>, bloc de Jordan, forme normale de Jordan.</li>
-          <li>Multiplicités algébrique vs géométrique, interprétation.</li>
-        </ul>
-        <div class="ch">2 · Dualité & formes bilinéaires</div>
-        <ul>
-          <li>Espace dual, base duale, couplage.</li>
-          <li>Forme bilinéaire symétrique, forme quadratique, matrice de Gram.</li>
-          <li>Non-dégénérescence.</li>
-        </ul>
-        <div class="ch">3 · Formes quadratiques & pseudo-euclidien</div>
-        <ul>
-          <li>Rang, signature, base de Sylvester, <b>théorème d'inertie de Sylvester</b>.</li>
-          <li>Espace de Minkowski : vecteurs temps / espace / lumière, relations de causalité.</li>
-        </ul>
-        <div class="ch">4 · Espaces euclidiens</div>
-        <ul>
-          <li>Produit scalaire, orthogonalité, complément & projection orthogonale.</li>
-          <li>Isométrie, groupe orthogonal.</li>
-          <li><b>Gram–Schmidt</b>, inégalité de Cauchy–Schwarz.</li>
-        </ul>
-        <div class="ch">5 · Espaces hermitiens</div>
-        <ul>
-          <li>Produit hermitien, adjoint d'un opérateur.</li>
-          <li>Opérateur normal, auto-adjoint, unitaire — propriétés spectrales.</li>
-          <li><b>Théorème spectral</b> pour les opérateurs normaux sur espace hermitien complexe.</li>
-        </ul>
+    <!-- Progression globale -->
+    <div class="overall">
+      <svg width="54" height="54" viewBox="0 0 54 54" aria-hidden="true">
+        <circle cx="27" cy="27" r="22" fill="none" stroke="var(--line)" stroke-width="5"/>
+        <circle id="ringfill" cx="27" cy="27" r="22" fill="none"
+                stroke="var(--ink)" stroke-width="5" stroke-linecap="round"
+                stroke-dasharray="138.2" stroke-dashoffset="138.2"
+                transform="rotate(-90 27 27)" style="transition:stroke-dashoffset .4s"/>
+        <text id="ringtxt" x="27" y="31" text-anchor="middle"
+              font-family="Fraunces,serif" font-size="12" font-weight="600"
+              fill="var(--ink)">0%</text>
+      </svg>
+      <div class="meta">
+        <div class="ot">Progression globale</div>
+        <div class="os">
+          <span id="donecount">0</span> tâches sur <span id="totalcount">…</span>
+          — <span id="pcttext">0 %</span>
+        </div>
+        <div class="bar"><i id="overbar"></i></div>
       </div>
     </div>
 
-    <div class="ref" id="ref-metro">
-      <div class="rhead" role="button" tabindex="0"
-           aria-expanded="false" aria-controls="rb-metro">
-        Métrologie — pièges récurrents à l'oral (annales 2021–2024)
-        <span class="rchev" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.7"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-      </div>
-      <div class="rbody" id="rb-metro">
-        <p>Ces « pourquoi » reviennent presque chaque année — prépare une réponse
-        nette pour chacun, avec le schéma si possible.</p>
-        <ul>
-          <li><b>4 fils vs 2 fils :</b> élimine la résistance des fils de connexion ; l'ampli différentiel a une haute impédance d'entrée → courant négligeable dans les fils de mesure.</li>
-          <li><b>Pirani protège la Penning :</b> la Penning ne doit pas être allumée à haute pression, risque de décharge/détérioration. On vérifie d'abord avec la Pirani.</li>
-          <li><b>Lest d'air (pompe à palettes) :</b> évite la condensation / émulsion de vapeur d'eau dans l'huile. On l'enlève vers ~1 mbar.</li>
-          <li><b>Bourdon, pourquoi se courbe :</b> p = F/S, surface extérieure > surface intérieure → force résultante qui redresse le tube.</li>
-          <li><b>4 résistances (pont piézorésistif) :</b> compensation de la dérive en température (effet thermorésistif) ; variation symétrique des résistances.</li>
-          <li><b>RMS / TrueRMS :</b> Vrms = Vpeak/√2 uniquement pour sinusoïde ; TrueRMS = √⟨V²⟩ valable pour tout signal. Limite : bande passante du voltmètre (décroche vers 2 MHz).</li>
-          <li><b>Octave vs décade :</b> octave = ×2 en fréquence, décade = ×10. 1 dB/décade = 3,32 dB/octave. Filtre 1er ordre → −20 dB/décade.</li>
-          <li><b>Thermocouple :</b> effet Seebeck, jonction de référence (glace fondante = 0 °C fixe ; eau bouillante ≈ 98 °C à Lausanne). Contact thermique mais pas électrique à la soudure.</li>
-          <li><b>Pt100, méthode 3 fils :</b> compensation partielle de la résistance des fils — les 3 fils <em>doivent</em> avoir la même résistance, sinon la compensation échoue.</li>
-          <li><b>Capteur inductif :</b> noyau ferromagnétique modifie l'inductance ; on mesure une <em>tension</em> (pas un courant) entre les deux bobines secondaires.</li>
-          <li><b>PID :</b> u(t) = Kp·e + Ki·∫e dt + Kd·de/dt. Pb = 100/Kp (bande proportionnelle). Manip pour régler Pb : faire osciller le système et observer.</li>
-          <li><b>Pompe turbomoléculaire :</b> ne fonctionne qu'en régime moléculaire (besoin d'un vide primaire préalable).</li>
-          <li><b>Lentille divergente → image réelle :</b> nécessite un objet virtuel (faisceau convergent incident), avec |d| &lt; distance focale.</li>
-        </ul>
-      </div>
+    <!-- Progression par matière -->
+    <div class="subjprog" id="subjprog" aria-label="Progression par matière"></div>
+
+    <!-- Légende -->
+    <div class="legend" aria-label="Légende des matières">
+      <span class="lg"><span class="dot" style="background:var(--alg)"></span>Algèbre lin. II</span>
+      <span class="lg"><span class="dot" style="background:var(--thermo)"></span>Thermodynamique</span>
+      <span class="lg"><span class="dot" style="background:var(--analyse)"></span>Analyse II</span>
+      <span class="lg"><span class="dot" style="background:var(--metro)"></span>Métrologie</span>
     </div>
+
+    <!-- Plan jour par jour -->
+    <main id="plan" aria-label="Planning jour par jour"></main>
+
+    <!-- Aide-mémoire -->
+    <section class="refs" aria-label="Aide-mémoire">
+      <h2>Aide-mémoire</h2>
+
+      <div class="ref" id="ref-preuves">
+        <div class="rhead" role="button" tabindex="0"
+             aria-expanded="false" aria-controls="rb-preuves">
+          Les 14 preuves d'Analyse à savoir par cœur
+          <span class="rchev" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.7"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <div class="rbody" id="rb-preuves">
+          <p>Le prof a annoncé qu'<b>une question portera sur l'une de ces preuves</b>. Les autres
+          questions peuvent réutiliser des morceaux. Récite-les à voix haute / sur papier sans regarder.</p>
+          <div class="ch">Ch.1 — Espace ℝⁿ</div>
+          <ol>
+            <li>Une suite de ℝⁿ converge ⟺ chaque composante converge.</li>
+            <li>La boule ouverte est ouverte / la boule fermée est fermée.</li>
+          </ol>
+          <div class="ch">Ch.2 — Courbes paramétrées</div>
+          <ol start="3"><li>Formule de la longueur d'une courbe par les sommes de Riemann.</li></ol>
+          <div class="ch">Ch.3 — Fonctions</div>
+          <ol start="4">
+            <li>x₀ est un point d'accumulation de E ⟺ ∃ suite (xₖ) ∈ E\{x₀} avec xₖ → x₀.</li>
+            <li>Une fonction continue sur un ouvert, prolongée par continuité au bord, est continue sur la fermeture.</li>
+          </ol>
+          <div class="ch">Ch.4 — Dérivées partielles</div>
+          <ol start="6">
+            <li>f continûment différentiable en x₀ ⟹ f différentiable en x₀.</li>
+            <li>Théorème des accroissements finis.</li>
+            <li>Formule de la dérivée directionnelle pour une fonction différentiable.</li>
+            <li>Théorème de Taylor pour une fonction C².</li>
+            <li>Condition suffisante pour que f(x₀) soit un extremum local.</li>
+            <li>Condition nécessaire : extremum lié ⟹ point stationnaire du lagrangien.</li>
+          </ol>
+          <div class="ch">Ch.5 — Intégrales</div>
+          <ol start="12">
+            <li>L'intégrale d'une fonction continue dépendant d'un paramètre est continue.</li>
+            <li>Dérivabilité de l'intégrale paramétrique — Leibniz (bornes constantes).</li>
+          </ol>
+          <div class="ch">Ch.6 — EDO</div>
+          <ol start="14"><li>Existence et unicité locale des solutions d'une EDO à variables séparées.</li></ol>
+        </div>
+      </div>
+
+      <div class="ref" id="ref-alg">
+        <div class="rhead" role="button" tabindex="0"
+             aria-expanded="false" aria-controls="rb-alg">
+          Plan du prof d'Algèbre — savoir-faire chapitres 9 à 13
+          <span class="rchev" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.7"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <div class="rbody" id="rb-alg">
+          <p>Cible : pouvoir <b>énoncer les définitions</b>, appliquer les résultats et
+          <b>rédiger des démos courtes</b>. Coche chaque point lors de ta récitation finale.</p>
+          <div class="ch">1 · Polynômes minimaux & réduction</div>
+          <ul>
+            <li>Polynôme annulateur, polynôme minimal, <b>Cayley–Hamilton</b>.</li>
+            <li>Sous-espace invariant, valeur propre / sous-espace propre généralisé.</li>
+            <li><b>Décomposition primaire</b>, bloc de Jordan, forme normale de Jordan.</li>
+            <li>Multiplicités algébrique vs géométrique, interprétation.</li>
+          </ul>
+          <div class="ch">2 · Dualité & formes bilinéaires</div>
+          <ul>
+            <li>Espace dual, base duale, couplage.</li>
+            <li>Forme bilinéaire symétrique, forme quadratique, matrice de Gram.</li>
+            <li>Non-dégénérescence.</li>
+          </ul>
+          <div class="ch">3 · Formes quadratiques & pseudo-euclidien</div>
+          <ul>
+            <li>Rang, signature, base de Sylvester, <b>théorème d'inertie de Sylvester</b>.</li>
+            <li>Espace de Minkowski : vecteurs temps / espace / lumière, relations de causalité.</li>
+          </ul>
+          <div class="ch">4 · Espaces euclidiens</div>
+          <ul>
+            <li>Produit scalaire, orthogonalité, complément & projection orthogonale.</li>
+            <li>Isométrie, groupe orthogonal.</li>
+            <li><b>Gram–Schmidt</b>, inégalité de Cauchy–Schwarz.</li>
+          </ul>
+          <div class="ch">5 · Espaces hermitiens</div>
+          <ul>
+            <li>Produit hermitien, adjoint d'un opérateur.</li>
+            <li>Opérateur normal, auto-adjoint, unitaire — propriétés spectrales.</li>
+            <li><b>Théorème spectral</b> pour les opérateurs normaux sur espace hermitien complexe.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ref" id="ref-metro">
+        <div class="rhead" role="button" tabindex="0"
+             aria-expanded="false" aria-controls="rb-metro">
+          Métrologie — pièges récurrents à l'oral (annales 2021–2024)
+          <span class="rchev" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.7"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <div class="rbody" id="rb-metro">
+          <p>Ces « pourquoi » reviennent presque chaque année — prépare une réponse
+          nette pour chacun, avec le schéma si possible.</p>
+          <ul>
+            <li><b>4 fils vs 2 fils :</b> élimine la résistance des fils de connexion ; l'ampli différentiel a une haute impédance d'entrée → courant négligeable dans les fils de mesure.</li>
+            <li><b>Pirani protège la Penning :</b> la Penning ne doit pas être allumée à haute pression, risque de décharge/détérioration. On vérifie d'abord avec la Pirani.</li>
+            <li><b>Lest d'air (pompe à palettes) :</b> évite la condensation / émulsion de vapeur d'eau dans l'huile. On l'enlève vers ~1 mbar.</li>
+            <li><b>Bourdon, pourquoi se courbe :</b> p = F/S, surface extérieure > surface intérieure → force résultante qui redresse le tube.</li>
+            <li><b>4 résistances (pont piézorésistif) :</b> compensation de la dérive en température (effet thermorésistif) ; variation symétrique des résistances.</li>
+            <li><b>RMS / TrueRMS :</b> Vrms = Vpeak/√2 uniquement pour sinusoïde ; TrueRMS = √⟨V²⟩ valable pour tout signal. Limite : bande passante du voltmètre (décroche vers 2 MHz).</li>
+            <li><b>Octave vs décade :</b> octave = ×2 en fréquence, décade = ×10. 1 dB/décade = 3,32 dB/octave. Filtre 1er ordre → −20 dB/décade.</li>
+            <li><b>Thermocouple :</b> effet Seebeck, jonction de référence (glace fondante = 0 °C fixe ; eau bouillante ≈ 98 °C à Lausanne). Contact thermique mais pas électrique à la soudure.</li>
+            <li><b>Pt100, méthode 3 fils :</b> compensation partielle de la résistance des fils — les 3 fils <em>doivent</em> avoir la même résistance, sinon la compensation échoue.</li>
+            <li><b>Capteur inductif :</b> noyau ferromagnétique modifie l'inductance ; on mesure une <em>tension</em> (pas un courant) entre les deux bobines secondaires.</li>
+            <li><b>PID :</b> u(t) = Kp·e + Ki·∫e dt + Kd·de/dt. Pb = 100/Kp (bande proportionnelle). Manip pour régler Pb : faire osciller le système et observer.</li>
+            <li><b>Pompe turbomoléculaire :</b> ne fonctionne qu'en régime moléculaire (besoin d'un vide primaire préalable).</li>
+            <li><b>Lentille divergente → image réelle :</b> nécessite un objet virtuel (faisceau convergent incident), avec |d| &lt; distance focale.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ══ VUE : EXAMENS FAITS ═════════════════════════════════════════════════ -->
+  <section id="view-exams" class="view" aria-label="Examens faits">
+    <div class="exams-intro">
+      <h2>Examens à faire</h2>
+      <p>Coche les annales/examens blancs au fur et à mesure. Tu peux <b>ajouter</b> ou
+         <b>retirer</b> un examen de chaque liste. Cette liste est sauvegardée comme la progression.</p>
+    </div>
+    <div id="examTracker"></div>
   </section>
 
   <!-- ── Pied de page ──────────────────────────────────────────────────────── -->
   <footer>
-    Les tâches « Examen #N + correction » supposent d'avoir accès aux annales Moodle.<br>
     Progression sauvegardée localement ou dans le dépôt GitHub selon la configuration.
     <br><button class="reset-btn" id="resetBtn">Réinitialiser toute la progression</button>
   </footer>

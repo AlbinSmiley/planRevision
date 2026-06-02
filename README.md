@@ -2,6 +2,12 @@
 
 Site statique interactif pour suivre la progression de révision sur 4 examens (Algèbre, Thermodynamique, Analyse II, Métrologie).
 
+## Onglets
+
+- **Aujourd'hui** — affiche automatiquement le programme du jour selon la date du jour (champ `date` de chaque jour dans `data.js`), le prochain examen, et les échéances de maîtrise des cartes/preuves.
+- **Plan complet** — comptes à rebours, progression globale, **progression par matière**, planning jour par jour et aide-mémoire.
+- **Examens faits** — checklist des annales / examens blancs par matière. On peut **cocher**, **ajouter** et **retirer** des examens ; la liste est sauvegardée comme la progression.
+
 ## Structure des fichiers
 
 ```
@@ -99,7 +105,7 @@ Le point coloré en haut à droite indique l'état :
 Tout le contenu est dans **`data.js`** — chaque objet de `PLAN` est un jour ou un séparateur de phase. Tu peux ajouter, supprimer ou modifier des tâches librement. Recharge la page après modification.
 
 ```js
-{ id: 'd01', wd: 'mar', d: '2 juin', h: '~8 h',
+{ id: 'd01', wd: 'mar', d: '2 juin', date: '2026-06-02', h: '~8 h',
   title: 'Titre du jour',
   sub: 'Sous-titre optionnel',
   blocks: [
@@ -110,4 +116,13 @@ Tout le contenu est dans **`data.js`** — chaque objet de `PLAN` est un jour ou
 },
 ```
 
+Le champ **`date`** (format `AAAA-MM-JJ`) sert à l'onglet « Aujourd'hui » : c'est lui qui détermine quel jour est affiché en fonction de la date réelle.
+
 Tags disponibles : `alg` · `thermo` · `analyse` · `metro` · `rest`
+
+### Examens & échéances
+
+Dans `data.js` :
+
+- **`EXAM_POOL`** — liste de départ des annales/examens blancs par matière (onglet « Examens faits »). Modifiable aussi directement dans l'app.
+- **`DEADLINES`** — dates limites de maîtrise des cartes/preuves, affichées dans l'onglet « Aujourd'hui ».
