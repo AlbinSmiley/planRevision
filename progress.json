@@ -1,4 +1,99 @@
 {
   "tasks": {},
-  "exams": {}
+  "exams": {
+    "alg": [
+      {
+        "name": "2025",
+        "done": true
+      },
+      {
+        "name": "2024",
+        "done": false
+      },
+      {
+        "name": "2023",
+        "done": false
+      },
+      {
+        "name": "2022",
+        "done": false
+      },
+      {
+        "name": "2021",
+        "done": false
+      },
+      {
+        "name": "2020",
+        "done": false
+      },
+      {
+        "name": "2019",
+        "done": false
+      },
+      {
+        "name": "Examen blanc",
+        "done": false
+      }
+    ],
+    "thermo": [
+      {
+        "name": "2025",
+        "done": false
+      },
+      {
+        "name": "2024",
+        "done": false
+      },
+      {
+        "name": "2023",
+        "done": false
+      },
+      {
+        "name": "2022",
+        "done": false
+      },
+      {
+        "name": "2021",
+        "done": false
+      },
+      {
+        "name": "2020",
+        "done": false
+      },
+      {
+        "name": "2019",
+        "done": false
+      },
+      {
+        "name": "Examen blanc",
+        "done": false
+      }
+    ],
+    "analyse": [
+      {
+        "name": "2023",
+        "done": false
+      },
+      {
+        "name": "2022",
+        "done": false
+      },
+      {
+        "name": "2021",
+        "done": false
+      },
+      {
+        "name": "2020",
+        "done": false
+      },
+      {
+        "name": "2019",
+        "done": false
+      },
+      {
+        "name": "Examen blanc",
+        "done": false
+      }
+    ]
+  }
 }
