@@ -1,4 +1,4 @@
-import { PLAN, EXAMS, DEADLINES, SUBJECTS } from './data.js?v=4';
+import { PLAN, EXAMS, DEADLINES, SUBJECTS } from './data.js?v=5';
 
 /* ════════════════════════════════════════════════════════════════════════════
    MODÈLE (schema v2)
@@ -10,8 +10,9 @@ import { PLAN, EXAMS, DEADLINES, SUBJECTS } from './data.js?v=4';
    de cette même liste → cocher où que ce soit fait avancer la même progression.
    ════════════════════════════════════════════════════════════════════════════ */
 
-let STATE = { schema: 'v2', tasks: [] };
+let STATE = { schema: 'v2', tasks: [], dayMeta: {} };
 let GH = null, progressSha = null, saveTimer = null;
+let planSelected = null;   // date ISO sélectionnée dans le calendrier
 
 // ─── Métadonnées des jours (depuis le PLAN) ─────────────────────────────────────
 const DAYS = {};            // dayId -> day
@@ -40,6 +41,14 @@ function fmtDateShort(iso) { return new Date(iso + 'T12:00:00').toLocaleDateStri
 function daysUntil(iso) { return Math.round((new Date(iso + 'T00:00:00') - startOfToday()) / 86400000); }
 function uid() { return 'u-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7); }
 function whenRank(w) { const i = WHEN_ORDER.indexOf(w); return i < 0 ? 99 : i; }
+function isoLocal(d) { const z = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`; }
+function isToday(date) { return date === isoToday(); }
+
+// Titre d'un jour (avec éventuelle surcharge utilisateur depuis l'éditeur)
+function dayTitle(item) {
+  const o = STATE.dayMeta && STATE.dayMeta[item.id];
+  return (o && o.title) || item.title;
+}
 
 // ─── Modèle : sélecteurs / opérations ───────────────────────────────────────────
 const isCountable = t => t.kind !== 'break' && t.subject !== 'rest';
@@ -66,7 +75,10 @@ function maxOrder(date) {
 
 // ─── Migration / seed depuis le PLAN ────────────────────────────────────────────
 function migrate(raw) {
-  if (raw && raw.schema === 'v2' && Array.isArray(raw.tasks)) return raw;
+  if (raw && raw.schema === 'v2' && Array.isArray(raw.tasks)) {
+    if (!raw.dayMeta) raw.dayMeta = {};
+    return raw;
+  }
 
   let doneMap = {}, userTasks = [], removed = {};
   if (raw && typeof raw === 'object') {
@@ -91,7 +103,7 @@ function migrate(raw) {
     if (!day) return;
     tasks.push({ id: u.id || uid(), date: u.date, subject: u.subject, when: u.when || 'Journée', label: u.label, kind: 'task', order: order++, done: !!doneMap[u.id] });
   });
-  return { schema: 'v2', tasks };
+  return { schema: 'v2', tasks, dayMeta: {} };
 }
 
 // ─── Temps restant ───────────────────────────────────────────────────────────────
@@ -162,8 +174,21 @@ async function init() {
   }
 
   renderAll();
-  bindGlobalClicks(); bindTabs(); bindSettings(); bindReset(); bindRefs();
+  bindGlobalClicks(); bindTabs(); bindSettings(); bindReset(); bindRefs(); bindTheme();
   tick(); setInterval(tick, 30000);
+}
+
+// ─── Thème clair / sombre ───────────────────────────────────────────────────────
+function bindTheme() {
+  const btn = document.getElementById('themeBtn'); if (!btn) return;
+  btn.addEventListener('click', () => {
+    const cur = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch {}
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = next === 'dark' ? '#1C1A17' : '#F7F2E9';
+  });
 }
 
 function renderAll() {
@@ -185,7 +210,7 @@ function whenOptionsHTML(sel) {
 function dayOptionsHTML(selDate) {
   return DAY_ORDER.map(id => {
     const d = DAYS[id];
-    return `<option value="${d.date}"${d.date === selDate ? ' selected' : ''}>${cap(fmtDateShort(d.date))} — ${escapeHtml(d.title)}</option>`;
+    return `<option value="${d.date}"${d.date === selDate ? ' selected' : ''}>${cap(fmtDateShort(d.date))} — ${escapeHtml(dayTitle(d))}</option>`;
   }).join('');
 }
 
@@ -223,7 +248,8 @@ function dayCardHTML(item, opts = {}) {
   const dayTasks = tasksForDate(item.date);
   const { done, total } = counts(dayTasks);
   const completed = total > 0 && done === total;
-  const cls = ['day', isExam ? 'exam-day' : '', opts.open ? 'open' : '', opts.today ? 'is-today' : '', completed ? 'done-day' : ''].filter(Boolean).join(' ');
+  const today = isToday(item.date);
+  const cls = ['day', isExam ? 'exam-day' : '', opts.open ? 'open' : '', today ? 'today-hl' : '', completed ? 'done-day' : ''].filter(Boolean).join(' ');
   const blocks = groupByWhen(dayTasks).map(g => `
     <div class="block"><span class="bwhen">${g.when}</span>
       <div class="btasks">${g.tasks.map(t => taskHTML(t, { showSubjectTag: true })).join('')}</div>
@@ -232,22 +258,89 @@ function dayCardHTML(item, opts = {}) {
   <article class="${cls}" data-id="${item.id}">
     <div class="dhead">
       <div class="dnum"><span class="wd">${item.wd}</span><span class="dd">${item.d.split(' ')[0]}</span></div>
-      <div class="dtitle"><div class="h">${item.title}</div>${item.sub ? `<div class="sub">${item.sub}</div>` : ''}</div>
+      <div class="dtitle"><div class="h">${escapeHtml(dayTitle(item))}${today ? '<span class="today-badge">aujourd’hui</span>' : ''}</div>${item.sub ? `<div class="sub">${item.sub}</div>` : ''}</div>
       <div class="dmeta"><span class="hrs">${item.h}</span><span class="dprog">${total ? `${done}/${total}` : ''}</span><span class="chev" aria-hidden="true">${CHEV}</span></div>
     </div>
     <div class="dbody">${isExam ? examFlagHTML(item) : ''}${blocks || '<div class="dempty">Aucune tâche.</div>'}</div>
   </article>`;
 }
 
-// ─── Vue : Plan complet ─────────────────────────────────────────────────────────
+// ─── Vue : Plan (calendrier) ────────────────────────────────────────────────────
+const CAL_DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+function dominantSubject(tasks) {
+  const freq = {};
+  tasks.forEach(t => { if (isCountable(t)) freq[t.subject] = (freq[t.subject] || 0) + 1; });
+  return Object.keys(freq).sort((a, b) => freq[b] - freq[a])[0] || null;
+}
+
+function calCellHTML(d) {
+  const iso = isoLocal(d);
+  const day = DAYS_BY_DATE[iso];
+  if (!day) return `<div class="cal-cell empty"><span class="cal-d">${d.getDate()}</span></div>`;
+  const tasks = tasksForDate(iso);
+  const { done, total } = counts(tasks);
+  const completed = total > 0 && done === total;
+  const dom = day.exam ? day.exam.k : dominantSubject(tasks);
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const cls = ['cal-cell', dom || '', day.exam ? 'exam' : '', completed ? 'done' : '', isToday(iso) ? 'today' : '', iso === planSelected ? 'sel' : ''].filter(Boolean).join(' ');
+  return `<button class="${cls}" data-cal-date="${iso}" type="button">
+    <span class="cal-top"><span class="cal-d">${d.getDate()}</span>${day.exam ? '<span class="cal-star">★</span>' : ''}</span>
+    <span class="cal-mid">${completed ? '<span class="cal-chk">✓</span>' : (total ? `<span class="cal-frac">${done}/${total}</span>` : '<span class="cal-rest">·</span>')}</span>
+    <span class="cal-bar"><i style="width:${pct}%"></i></span>
+  </button>`;
+}
+
 function renderPlan() {
   const plan = document.getElementById('plan'); if (!plan) return;
-  let html = '', delay = 0;
-  PLAN.forEach(item => {
-    if (item.phase) html += `<h2 class="phase">${item.phase}</h2>`;
-    else { html += `<div style="animation-delay:${Math.min(delay * 18, 320)}ms">${dayCardHTML(item)}</div>`; delay++; }
-  });
-  plan.innerHTML = html;
+  const dates = Object.keys(DAYS_BY_DATE).sort();
+  if (!dates.length) { plan.innerHTML = ''; return; }
+  if (!planSelected || !DAYS_BY_DATE[planSelected]) {
+    planSelected = DAYS_BY_DATE[isoToday()] ? isoToday() : dates[0];
+  }
+  const first = new Date(dates[0] + 'T12:00:00');
+  const last  = new Date(dates[dates.length - 1] + 'T12:00:00');
+  const start = new Date(first); start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+  const end   = new Date(last);  end.setDate(end.getDate() + (6 - ((last.getDay() + 6) % 7)));
+
+  let cells = '';
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) cells += calCellHTML(new Date(d));
+
+  plan.innerHTML = `
+    <div class="calendar">
+      <div class="cal-grid cal-head">${CAL_DAYS.map(w => `<span>${w}</span>`).join('')}</div>
+      <div class="cal-grid cal-body">${cells}</div>
+    </div>
+    <div class="cal-detail" id="calDetail"></div>`;
+  renderCalDetail();
+}
+
+function renderCalDetail() {
+  const c = document.getElementById('calDetail'); if (!c) return;
+  const day = DAYS_BY_DATE[planSelected];
+  c.innerHTML = day ? dayCardHTML(day, { open: true }) : '';
+}
+
+function refreshCalendarCells() {
+  const body = document.querySelector('#plan .cal-body'); if (!body) return;
+  // Reconstruit uniquement la grille (léger), garde le détail/scroll
+  const dates = Object.keys(DAYS_BY_DATE).sort();
+  const first = new Date(dates[0] + 'T12:00:00');
+  const last  = new Date(dates[dates.length - 1] + 'T12:00:00');
+  const start = new Date(first); start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+  const end   = new Date(last);  end.setDate(end.getDate() + (6 - ((last.getDay() + 6) % 7)));
+  let cells = '';
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) cells += calCellHTML(new Date(d));
+  body.innerHTML = cells;
+}
+
+function selectPlanDay(date) {
+  if (!DAYS_BY_DATE[date]) return;
+  planSelected = date;
+  refreshCalendarCells();
+  renderCalDetail();
+  const det = document.getElementById('calDetail');
+  if (det) det.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ─── Vue : Aujourd'hui ──────────────────────────────────────────────────────────
@@ -261,7 +354,7 @@ function renderToday() {
   if (item) {
     const { done, total } = counts(tasksForDate(item.date));
     if (total === 0 && !item.exam) {
-      html += `<div class="today-rest"><div class="tr-emoji">🌿</div><div class="tr-title">${item.title}</div><div class="tr-sub">${item.sub || 'Rien de prévu aujourd’hui.'}</div></div>`;
+      html += `<div class="today-rest"><div class="tr-emoji">🌿</div><div class="tr-title">${escapeHtml(dayTitle(item))}</div><div class="tr-sub">${item.sub || 'Rien de prévu aujourd’hui.'}</div></div>`;
     } else {
       html += `<div class="today-progress">Tâches du jour : <b>${done}/${total}</b> faites${done === total && total > 0 ? ' — journée terminée ✓' : ''}</div>`;
       html += `<div class="today-card">${dayCardHTML(item, { open: true, today: true })}</div>`;
@@ -347,10 +440,14 @@ function editDayHTML(item) {
   const { done, total } = counts(list);
   const completed = total > 0 && done === total;
   const rows = list.map((t, i) => editRowHTML(t, i, list.length)).join('');
-  return `<article class="day edit-day${completed ? ' done-day' : ''}" data-id="${item.id}">
+  const today = isToday(item.date);
+  return `<article class="day edit-day${completed ? ' done-day' : ''}${today ? ' today-hl' : ''}" data-id="${item.id}">
     <div class="dhead">
       <div class="dnum"><span class="wd">${item.wd}</span><span class="dd">${item.d.split(' ')[0]}</span></div>
-      <div class="dtitle"><div class="h">${item.title}</div><div class="sub">${list.length} élément(s)${item.exam ? ' · examen' : ''}</div></div>
+      <div class="dtitle">
+        <button class="h h-edit" type="button" data-edit-day-title title="Renommer la journée">${escapeHtml(dayTitle(item))} <span class="pen">✎</span></button>
+        <div class="sub">${list.length} élément(s)${item.exam ? ' · examen' : ''}${today ? ' · aujourd’hui' : ''}</div>
+      </div>
       <div class="dmeta"><span class="dprog">${total ? `${done}/${total}` : ''}</span><span class="chev" aria-hidden="true">${CHEV}</span></div>
     </div>
     <div class="dbody">
@@ -397,7 +494,10 @@ function editRowHTML(t, i, n) {
 
 function bindEdit(root) {
   root.addEventListener('click', e => {
+    const titleBtn = e.target.closest('[data-edit-day-title]');
+    if (titleBtn) { e.stopPropagation(); renameDay(titleBtn.closest('.day').dataset.id); return; }
     const row = e.target.closest('.erow');
+    if (!row) return;
     if (e.target.closest('[data-move-up]'))   { moveTask(row.dataset.id, -1); return; }
     if (e.target.closest('[data-move-down]')) { moveTask(row.dataset.id, +1); return; }
     if (e.target.closest('[data-edit-label]')) { editLabel(row.dataset.id); return; }
@@ -433,6 +533,16 @@ function editLabel(id) {
   const v = prompt('Modifier l’intitulé :', t.label);
   if (v !== null) { t.label = v.trim() || t.label; renderAll(); scheduleSave(); }
 }
+function renameDay(dayId) {
+  const item = DAYS[dayId]; if (!item) return;
+  const v = prompt('Nom de la journée :', dayTitle(item));
+  if (v === null) return;
+  STATE.dayMeta = STATE.dayMeta || {};
+  const t = v.trim();
+  if (!t || t === item.title) delete STATE.dayMeta[dayId];   // revient au nom d'origine
+  else STATE.dayMeta[dayId] = { ...(STATE.dayMeta[dayId] || {}), title: t };
+  renderAll(); scheduleSave();
+}
 function setWhen(id, when) {
   const t = STATE.tasks.find(x => x.id === id); if (!t) return;
   t.when = when; renderAll(); scheduleSave();
@@ -458,6 +568,7 @@ function toggleTask(id) {
   t.done = !t.done;
   document.querySelectorAll(`[data-task][data-id="${id}"]`).forEach(l => l.classList.toggle('done', !!t.done));
   updateProgress(); renderSubjectProgress(); updateSubjectCounts(); updateDayCounts(); renderToday();
+  refreshCalendarCells();
   scheduleSave();
 }
 
@@ -499,6 +610,8 @@ function updateSubjectCounts() {
 // ─── Clics globaux (délégation) ─────────────────────────────────────────────────
 function bindGlobalClicks() {
   document.addEventListener('click', e => {
+    const cell = e.target.closest('[data-cal-date]');
+    if (cell) { selectPlanDay(cell.dataset.calDate); return; }
     if (e.target.closest('.erow')) return;   // les lignes d'édition gèrent leurs propres clics
     const del = e.target.closest('[data-del-task]');
     if (del) { e.preventDefault(); removeTask(del.dataset.id); return; }

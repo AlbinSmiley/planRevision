@@ -8,10 +8,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <title>Révision · juin 2026</title>
+  <script>
+    /* Applique le thème avant le rendu pour éviter tout flash */
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t !== 'light' && t !== 'dark')
+          t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div class="wrap">
@@ -24,6 +35,16 @@
     </div>
     <div class="header-actions">
       <span class="sync-dot s-loading" id="syncStatus" title="Chargement…"></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Basculer thème clair/sombre" title="Thème clair / sombre">
+        <svg class="theme-sun" width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
+          <circle cx="8.5" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8.5 1v1.6M8.5 14.4V16M1 8.5h1.6M14.4 8.5H16M3.3 3.3l1.1 1.1M12.6 12.6l1.1 1.1M3.3 13.7l1.1-1.1M12.6 4.4l1.1-1.1"
+                stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <svg class="theme-moon" width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
+          <path d="M14 10.3A6 6 0 0 1 6.7 3a6 6 0 1 0 7.3 7.3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </button>
       <button class="icon-btn" id="settingsBtn" aria-label="Paramètres GitHub" title="Configurer la sync GitHub">
         <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
           <circle cx="8.5" cy="8.5" r="2.5" stroke="currentColor" stroke-width="1.5"/>
@@ -311,6 +332,6 @@
   </div>
 </dialog>
 
-<script type="module" src="app.js?v=4"></script>
+<script type="module" src="app.js?v=5"></script>
 </body>
 </html>
