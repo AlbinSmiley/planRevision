@@ -790,8 +790,8 @@ dialog::backdrop {
   .site-header { margin-bottom: 18px; }
   h1 { font-size: 24px; }
 
-  .tabs { top: 0; border-radius: 0; margin: 0 -14px 18px; border-left: none; border-right: none; }
-  .tab { padding: 11px 6px; font-size: 13px; }
+  .tabs { top: 0; border-radius: 0; margin: 0 -14px 18px; border-left: none; border-right: none; gap: 3px; padding: 5px; }
+  .tab { padding: 10px 4px; font-size: 11.5px; }
 
   /* tâches : zones tactiles plus larges */
   .task { font-size: 14.5px; gap: 11px; padding: 3px 0; }
@@ -819,8 +819,117 @@ dialog::backdrop {
   .addtask .at-row { flex-direction: column; }
   .addtask .at-day, .addtask .at-when, .addtask .at-row .btn { width: 100%; }
 
+  /* éditeur : la rangée de contrôles passe sous l'intitulé */
+  .erow { flex-wrap: wrap; }
+  .erow-main { flex-basis: calc(100% - 40px); }
+  .erow-ctrl { width: 100%; justify-content: flex-end; padding-top: 4px; }
+  .esel { max-width: none; flex: 1; }
+  .eadd .ea-subj, .eadd .ea-when, .eadd .eb-when, .eadd .btn { flex: 1; }
+
   .legend { gap: 10px 14px; }
 }
 
 /* État « jour sans tâche » */
 .dempty { font-size: 13px; color: var(--ink-faint); font-style: italic; padding: 8px 0; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   JOUR TERMINÉ (tout coché) → barré
+   ══════════════════════════════════════════════════════════════════════════════ */
+.day.done-day .dtitle .h {
+  text-decoration: line-through;
+  text-decoration-color: var(--analyse);
+  text-decoration-thickness: 2px;
+  color: var(--ink-faint);
+}
+.day.done-day .dnum {
+  background: var(--analyse-bg);
+  border-color: transparent;
+  color: var(--analyse-ink);
+}
+.day.done-day .dnum .wd, .day.done-day .dnum .dd { color: var(--analyse-ink); }
+.day.done-day .dprog { color: var(--analyse-ink); font-weight: 600; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PAUSES (affichage dans le plan / aujourd'hui)
+   ══════════════════════════════════════════════════════════════════════════════ */
+.breakrow {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--ink-soft);
+  background: var(--rest-bg);
+  border-radius: var(--r-sm);
+  padding: 6px 11px;
+}
+.breakrow .bk-ic { flex-shrink: 0; }
+.breakrow .bk-label { font-weight: 600; }
+.breakrow .bk-dur {
+  margin-left: auto; font-size: 11.5px; color: var(--ink-faint);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   VUE ÉDITER
+   ══════════════════════════════════════════════════════════════════════════════ */
+.edit-day .dhead { cursor: pointer; }
+.erows { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 14px; }
+
+.erow {
+  display: flex; align-items: stretch; gap: 10px;
+  background: var(--paper-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+}
+.erow.is-break { background: var(--rest-bg); }
+.erow.done { opacity: .65; }
+
+.erow-ord { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; justify-content: center; }
+.emini {
+  width: 26px; height: 20px; line-height: 1;
+  border: 1px solid var(--line-2); border-radius: 6px;
+  background: var(--paper-2); color: var(--ink-soft);
+  cursor: pointer; font-size: 12px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.emini:hover:not(:disabled) { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.emini:disabled { opacity: .3; cursor: default; }
+
+.erow-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; justify-content: center; }
+.erow-top { display: flex; align-items: center; gap: 8px; }
+.erow-min { font-size: 11.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.erow-label {
+  text-align: left; font-family: inherit; font-size: 13.5px; line-height: 1.4;
+  color: var(--ink); background: none; border: none; padding: 0; cursor: text;
+  border-bottom: 1px dashed transparent; transition: border-color .12s;
+}
+.erow-label:hover { border-bottom-color: var(--line-2); }
+
+.erow-ctrl { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.esel {
+  font-family: inherit; font-size: 11.5px;
+  padding: 5px 6px; max-width: 96px;
+  border: 1px solid var(--line-2); border-radius: 6px;
+  background: var(--paper-2); color: var(--ink); cursor: pointer; outline: none;
+}
+.esel:focus { border-color: var(--ink-soft); }
+.erow .tdel { width: 28px; height: 28px; }
+
+/* Formulaires d'ajout dans l'éditeur */
+.eadd {
+  display: flex; gap: 7px; align-items: center; flex-wrap: wrap;
+  padding: 9px 0 0; border-top: 1px dashed var(--line); margin-top: 4px;
+}
+.eadd + .eadd { border-top: none; padding-top: 7px; }
+.eadd .eadd-ic { font-size: 15px; }
+.eadd input, .eadd select {
+  font-family: inherit; font-size: 12.5px;
+  padding: 7px 9px;
+  border: 1px solid var(--line-2); border-radius: var(--r-sm);
+  background: var(--paper-3); color: var(--ink); outline: none;
+}
+.eadd input:focus, .eadd select:focus { border-color: var(--ink-soft); }
+.eadd .ea-label { flex: 1; min-width: 130px; }
+.eadd .eb-label { flex: 1; min-width: 90px; }
+.eadd .eb-min { width: 64px; }
+.eadd .ea-subj, .eadd .ea-when, .eadd .eb-when { flex-shrink: 0; }
+.eadd .btn { padding: 7px 12px; font-size: 12.5px; white-space: nowrap; }

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <div class="wrap">
@@ -37,8 +37,9 @@
   <!-- ── Onglets ──────────────────────────────────────────────────────────── -->
   <nav class="tabs" id="tabs" aria-label="Navigation">
     <button class="tab active" data-tab="today" type="button">Aujourd'hui</button>
-    <button class="tab" data-tab="plan"  type="button">Plan complet</button>
-    <button class="tab" data-tab="exams" type="button">Par matière</button>
+    <button class="tab" data-tab="plan"  type="button">Plan</button>
+    <button class="tab" data-tab="exams" type="button">Matières</button>
+    <button class="tab" data-tab="edit"  type="button">Éditer</button>
   </nav>
 
   <!-- ══ VUE : AUJOURD'HUI ═══════════════════════════════════════════════════ -->
@@ -249,6 +250,9 @@
     <div id="subjectChecklist"></div>
   </section>
 
+  <!-- ══ VUE : ÉDITER (organiser le plan) ════════════════════════════════════ -->
+  <section id="view-edit" class="view" aria-label="Éditer le plan"></section>
+
   <!-- ── Pied de page ──────────────────────────────────────────────────────── -->
   <footer>
     Progression sauvegardée localement ou dans le dépôt GitHub selon la configuration.
@@ -307,6 +311,6 @@
   </div>
 </dialog>
 
-<script type="module" src="app.js?v=3"></script>
+<script type="module" src="app.js?v=4"></script>
 </body>
 </html>

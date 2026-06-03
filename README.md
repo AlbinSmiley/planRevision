@@ -7,10 +7,11 @@ Site statique interactif pour suivre la progression de révision sur 4 examens (
 Tout est **une seule liste de tâches**. Chaque tâche a une matière (`subject` = tag) et un jour (`date`). Les trois onglets ne sont que trois regroupements de cette même liste, donc **cocher une tâche n'importe où la coche partout** et fait avancer la même progression globale.
 
 - **Aujourd'hui** — programme du jour selon la date réelle, **compte à rebours exact** (jours/heures/minutes) du prochain examen, et échéances cartes/preuves.
-- **Plan complet** — comptes à rebours (les examens passés sont **barrés**), progression globale, **progression par matière**, planning jour par jour, aide-mémoire.
-- **Par matière** — checklist générale regroupée par matière (triée par date) : tout ce qu'il y a à faire pour chaque examen. On peut **cocher**, **ajouter** une tâche (en choisissant pour quel jour et quel moment) ou en **retirer** une.
+- **Plan** — comptes à rebours (examens passés **barrés**), progression globale, progression par matière, planning jour par jour, aide-mémoire. **Une journée entièrement faite est barrée.**
+- **Matières** — checklist regroupée par matière (triée par date). Cocher / ajouter (en choisissant le jour) / retirer.
+- **Éditer** — organisation libre jour par jour : ajouter des tâches ou des **pauses** (durée en minutes), **réordonner** (↑ ↓), **déplacer** une tâche vers un autre jour, changer son moment, modifier l'intitulé (clic) ou supprimer.
 
-Les tâches du plan sont définies dans `data.js` (`PLAN`). Les tâches ajoutées par l'utilisateur et les suppressions sont stockées dans `progress.json` (`userTasks`, `removed`) et synchronisées comme la progression.
+`data.js` (`PLAN`) ne sert que de **point de départ** (seed). À partir de là, le plan devient entièrement éditable : tout l'état (tâches, pauses, ordre, cases cochées) est stocké dans `progress.json` (`{ schema: "v2", tasks: [...] }`) et synchronisé. Les anciens formats sont migrés automatiquement au chargement.
 
 ## Structure des fichiers
 
